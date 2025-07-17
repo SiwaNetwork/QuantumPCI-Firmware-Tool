@@ -1,32 +1,32 @@
-# The Firmware Tool
-This is a simple tool to add a header to a raw firmware binary. The header is used by a driver to check if the hardware is compatible with the image. The header is only 16 bytes long and contains a PCI Vendor ID, a PCI Device ID and a PCI Hardware Revision ID values to check. It also contains the CRC value of the raw image. The reason to add a header is to be sure that incompatible firware will not be written to the device via devlink unintentionally.
+# Quantum PCI FT
+Это простой инструмент для добавления заголовка к бинарному файлу прошивки. Заголовок используется драйвером для проверки совместимости оборудования с образом. Заголовок имеет длину всего 16 байт и содержит значения PCI Vendor ID, PCI Device ID и PCI Hardware Revision ID для проверки. Он также содержит значение CRC исходного образа. Причина добавления заголовка - убедиться, что несовместимая прошивка не будет случайно записана на устройство через devlink.
 
-## Header format
-| Magic Bytes | PCI Vendor ID | PCI Device ID | Image size | HW Rev ID | CRC16 |
+## Формат заголовка
+| Магические байты | PCI Vendor ID | PCI Device ID | Размер образа | HW Rev ID | CRC16 |
 | :----: | :----: | :----: | :----: | :----: | :----: |
-| 4 bytes | 2 bytes | 2 bytes | 4 bytes | 2 bytes | 2 bytes |
+| 4 байта | 2 байта | 2 байта | 4 байта | 2 байта | 2 байта |
 
-The firmware header consists 6 fields, all values are network order to be consistent across architectures:
+Заголовок прошивки состоит из 6 полей, все значения в сетевом порядке байтов для обеспечения совместимости между архитектурами:
 
-1. Magic header (4 bytes, 32 bits) - constant value, ‘OCTC’ means Open Compute Time Card
-2. PCI Vendor ID (2 bytes, 16 bits) - PCI device vendor ID compatible with this image
-3. PCI Device ID (2 bytes, 16 bits) - PCI device ID compatible with this image
-4. Image size (4 bytes, 32 bits, unsigned) - size of firmware itself without header (and footer should we have one)
-5. HW Revision (2 bytes, 16 bits) - Information provided by HW register to differentiate revisions of the same board
-6. CRC16 (2 bytes, 16 bits) - check value of CRC16 implementation with default polynom implemented in kernel
+1. Магический заголовок (4 байта, 32 бита) - константное значение, 'OCTC' означает Open Compute Time Card
+2. PCI Vendor ID (2 байта, 16 бит) - идентификатор производителя PCI устройства, совместимого с этим образом
+3. PCI Device ID (2 байта, 16 бит) - идентификатор PCI устройства, совместимого с этим образом
+4. Размер образа (4 байта, 32 бита, беззнаковое) - размер самой прошивки без заголовка (и подвала, если он есть)
+5. HW Revision (2 байта, 16 бит) - информация, предоставляемая аппаратным регистром для различения ревизий одной и той же платы
+6. CRC16 (2 байта, 16 бит) - контрольное значение реализации CRC16 с полиномом по умолчанию, реализованным в ядре
 
 
-## Usage
-The tool has several options:
-* `-input <filename>` - Mandatory option, provides a file name of a raw binary.
-* `-output <filename>` - Mandatory option, provides a file name to write a new firmware file with header. If file already exists it will be overwritten.
-* `-vendor <int>` - Mandatory option, provides a PCI Vendor ID to add to header.
-* `-device <int>` - Mandatory option, provides a PCI Device ID to add to header.
-* `-hw <int>` - Optional, used to provide a PCI Hardware Rev ID. Default is 0.
-* `-apply` - Optional. This is used to actually create a new (or overwrite) output file with the header in the beginning.
+## Использование
+Инструмент имеет несколько опций:
+* `-input <имя_файла>` - Обязательная опция, указывает имя файла исходного бинарного файла.
+* `-output <имя_файла>` - Обязательная опция, указывает имя файла для записи нового файла прошивки с заголовком. Если файл уже существует, он будет перезаписан.
+* `-vendor <число>` - Обязательная опция, указывает PCI Vendor ID для добавления в заголовок.
+* `-device <число>` - Обязательная опция, указывает PCI Device ID для добавления в заголовок.
+* `-hw <число>` - Необязательная опция, используется для указания PCI Hardware Rev ID. По умолчанию 0.
+* `-apply` - Необязательная опция. Используется для фактического создания нового (или перезаписи) выходного файла с заголовком в начале.
 
-## Examples
+## Примеры
 ```
-./tft -input Time-Card/FPGA/Binary/Production/Binaries/TimeCardProduction.bin -output TimeCardProduction_Celestica.bin -vendor 0x18d4 -device 0x1008 -apply
+./quantum-pci-ft -input Time-Card/FPGA/Binary/Production/Binaries/TimeCardProduction.bin -output TimeCardProduction_Celestica.bin -vendor 0x18d4 -device 0x1008 -apply
 ```
-This call will create `TimeCardProduction_Celestica.bin` with header for timecard produced by Celestica.
+Эта команда создаст `TimeCardProduction_Celestica.bin` с заголовком для timecard, произведенной Celestica.

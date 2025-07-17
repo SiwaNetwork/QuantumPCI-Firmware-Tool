@@ -9,22 +9,24 @@ import (
 	crc "github.com/sigurn/crc16"
 )
 
-// hdrMagic is array of 4 constant bytes
+// hdrMagic - массив из 4 константных байтов-идентификаторов
 var hdrMagic = [4]byte{'O', 'C', 'P', 'C'}
-// ErrNoHeader is what returned when there is no header in the file
-var ErrNoHeader = errors.New("No header found")
+// ErrNoHeader возвращается, когда в файле нет заголовка
+var ErrNoHeader = errors.New("Заголовок не найден")
 
 const hdrSize = 16
 
+// Header представляет структуру заголовка прошивки
 type Header struct {
-	Magic            [4]byte
-	VendorId         uint16
-	DeviceId         uint16
-	ImageSize        uint32
-	HardwareRevision uint16
-	CRC              uint16
+	Magic            [4]byte  // Магические байты для идентификации
+	VendorId         uint16   // ID производителя PCI устройства
+	DeviceId         uint16   // ID PCI устройства
+	ImageSize        uint32   // Размер образа прошивки (без заголовка)
+	HardwareRevision uint16   // Ревизия оборудования
+	CRC              uint16   // Контрольная сумма CRC16
 }
 
+// firmwareImageSize вычисляет размер образа прошивки
 func firmwareImageSize(c *Config) (uint32, error) {
 	stat, err := c.InputFile.Stat()
 	if err != nil {
@@ -39,7 +41,7 @@ func firmwareImageSize(c *Config) (uint32, error) {
 	return uint32(stat.Size() - pos), nil
 }
 
-// ReadHeader tries to read header from input file
+// ReadHeader пытается прочитать заголовок из входного файла
 func ReadHeader(c *Config) (*Header, error) {
 	buf := make([]byte, hdrSize)
 	n, err := c.InputFile.Read(buf)
@@ -53,11 +55,12 @@ func ReadHeader(c *Config) (*Header, error) {
 			return hdr, nil
 		}
 	}
+	// Если заголовок не найден, возвращаем указатель файла в начало
 	c.InputFile.Seek(0, 0)
 	return nil, ErrNoHeader
 }
 
-// PrepareHeader creates header structure from Config values
+// PrepareHeader создает структуру заголовка из значений конфигурации
 func PrepareHeader(c *Config) (*Header, error) {
 	imageSize, err := firmwareImageSize(c)
 	if err != nil {
@@ -75,7 +78,7 @@ func PrepareHeader(c *Config) (*Header, error) {
 	return hdr, nil
 }
 
-// WriteHeader writes header structure at the beginning of the output file
+// WriteHeader записывает структуру заголовка в начало выходного файла
 func WriteHeader(c *Config, hdr *Header) error {
 	if !c.Apply {
 		return nil
@@ -88,14 +91,15 @@ func WriteHeader(c *Config, hdr *Header) error {
 		return err
 	}
 
+	// Перемещаем указатель в конец файла
 	_, err = c.OutputFile.Seek(0, 2)
 	return err
 }
 
-// CalcCRC calculates CRC16 of input file and copies data to output file if specified
+// CalcCRC вычисляет CRC16 входного файла и копирует данные в выходной файл при необходимости
 func CalcCRC(c *Config) (uint16, error) {
 	crcTable := crc.MakeTable(crc.CRC16_ARC)
-	buf := make([]byte, 16384)
+	buf := make([]byte, 16384) // Буфер 16KB для эффективного чтения
 	crc16 := uint16(0xFFFF)
 
 	n, err := c.InputFile.Read(buf)
