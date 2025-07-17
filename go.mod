@@ -1,4 +1,4 @@
-module github.com/opencomputeproject/Time-Appliance-Project/Software/tft
+module github.com/opencomputeproject/quantum-pci-ft
 
 go 1.18
 

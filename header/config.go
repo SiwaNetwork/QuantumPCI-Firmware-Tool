@@ -5,45 +5,46 @@ import (
 	"os"
 )
 
+// Config содержит конфигурацию программы
 type Config struct {
-	Apply            bool
-	InputPath        string
-	OutputPath       string
-	VendorId         int
-	DeviceId         int
-	HardwareRevision int
-	InputFile        *os.File
-	OutputFile       *os.File
+	Apply            bool       // Флаг создания выходного файла
+	InputPath        string     // Путь к входному файлу прошивки
+	OutputPath       string     // Путь к выходному файлу с заголовком
+	VendorId         int        // PCI Vendor ID для заголовка
+	DeviceId         int        // PCI Device ID для заголовка
+	HardwareRevision int        // PCI Hardware Revision ID
+	InputFile        *os.File   // Дескриптор входного файла
+	OutputFile       *os.File   // Дескриптор выходного файла
 }
 
-// CheckConfig checks config structure for valid values
-// PCI Vendor ID, Device ID should fit into uint16 and be positive
-// PCI Hardware Revision should be any uint16
+// CheckConfig проверяет структуру конфигурации на корректность значений
+// PCI Vendor ID, Device ID должны помещаться в uint16 и быть положительными
+// PCI Hardware Revision должен быть любым значением uint16
 func CheckConfig(c *Config) error {
 	if c.InputPath == "" {
-		return errors.New("No input file provided")
+		return errors.New("Не указан входной файл")
 	}
 
 	if c.Apply && c.OutputPath == "" {
-		return errors.New("No output file provided")
+		return errors.New("Не указан выходной файл")
 	}
 
 	if c.Apply && (c.VendorId <= 0 || c.VendorId > 65535) {
-		return errors.New("Empty or incorrect PCI Vendor ID specified")
+		return errors.New("Пустой или некорректный PCI Vendor ID")
 	}
 
 	if c.Apply && (c.DeviceId <= 0 || c.DeviceId > 65535) {
-		return errors.New("Empty or incorrect PCI Device ID specified")
+		return errors.New("Пустой или некорректный PCI Device ID")
 	}
 
 	if c.Apply && (c.HardwareRevision < 0 || c.HardwareRevision > 65535) {
-		return errors.New("Incorrect PCI Device Revision ID specified")
+		return errors.New("Некорректный PCI Device Revision ID")
 	}
 
 	return nil
 }
 
-// OpenFiles actually opens files provided in config. Returns any error
+// OpenFiles открывает файлы, указанные в конфигурации. Возвращает ошибку при неудаче
 func OpenFiles(c *Config) error {
 	var err error
 	c.InputFile, err = os.Open(c.InputPath)
@@ -59,7 +60,7 @@ func OpenFiles(c *Config) error {
 	return nil
 }
 
-// CloseFiles closes previously opened files
+// CloseFiles закрывает ранее открытые файлы
 func CloseFiles(c *Config) {
 	c.InputFile.Close()
 	if c.Apply {
