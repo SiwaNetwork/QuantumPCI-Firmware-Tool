@@ -10,7 +10,7 @@ import (
 )
 
 func TestFirmwareHeader(t *testing.T) {
-	b := []byte{'O', 'C', 'P', 'C', 0, 0x10, 0, 0x10, 0, 0, 0, 4, 0, 0, 0, 0}
+	b := []byte{'S', 'H', 'I', 'W', 0, 0x10, 0, 0x10, 0, 0, 0, 4, 0, 0, 0, 0}
 	tmp, err := os.CreateTemp("", "fw.bin")
 	require.NoError(t, err)
 	defer os.Remove(tmp.Name())
@@ -46,7 +46,7 @@ func TestFirmwareHeader(t *testing.T) {
 }
 
 func TestFirmwareReadHeader(t *testing.T) {
-	b := []byte{'O', 'C', 'P', 'C', 0, 0x10, 0, 0x10, 0, 0, 0, 4, 0, 0, 0x3f, 0x1b, '0', '0', '0', '0'}
+	b := []byte{'S', 'H', 'I', 'W', 0, 0x10, 0, 0x10, 0, 0, 0, 4, 0, 0, 0x3f, 0x1b, '0', '0', '0', '0'}
 	tmp, err := os.CreateTemp("", "fw.bin")
 	require.NoError(t, err)
 	defer os.Remove(tmp.Name())
@@ -64,12 +64,12 @@ func TestFirmwareReadHeader(t *testing.T) {
 	}
 
 	hdr := &Header{
-		Magic:            [4]byte{'O', 'C', 'P', 'C'},
+		Magic:            [4]byte{'S', 'H', 'I', 'W'},
 		VendorId:         uint16(c.VendorId),
 		DeviceId:         uint16(c.DeviceId),
 		ImageSize:        uint32(4),
 		HardwareRevision: uint16(c.HardwareRevision),
-		CRC:			  uint16(0x3f1b),
+		CRC:              uint16(0x3f1b),
 	}
 	err = OpenFiles(c)
 	require.NoError(t, err)

@@ -10,7 +10,8 @@ import (
 )
 
 // hdrMagic - массив из 4 константных байтов-идентификаторов
-var hdrMagic = [4]byte{'O', 'C', 'P', 'C'}
+var hdrMagic = [4]byte{'S', 'H', 'I', 'W'}
+
 // ErrNoHeader возвращается, когда в файле нет заголовка
 var ErrNoHeader = errors.New("Заголовок не найден")
 
@@ -18,12 +19,12 @@ const hdrSize = 16
 
 // Header представляет структуру заголовка прошивки
 type Header struct {
-	Magic            [4]byte  // Магические байты для идентификации
-	VendorId         uint16   // ID производителя PCI устройства
-	DeviceId         uint16   // ID PCI устройства
-	ImageSize        uint32   // Размер образа прошивки (без заголовка)
-	HardwareRevision uint16   // Ревизия оборудования
-	CRC              uint16   // Контрольная сумма CRC16
+	Magic            [4]byte // Магические байты для идентификации
+	VendorId         uint16  // ID производителя PCI устройства
+	DeviceId         uint16  // ID PCI устройства
+	ImageSize        uint32  // Размер образа прошивки (без заголовка)
+	HardwareRevision uint16  // Ревизия оборудования
+	CRC              uint16  // Контрольная сумма CRC16
 }
 
 // firmwareImageSize вычисляет размер образа прошивки
@@ -49,8 +50,8 @@ func ReadHeader(c *Config) (*Header, error) {
 		return nil, err
 	}
 	if n == hdrSize {
-		hdr := &Header{};
-		binary.Read(bytes.NewReader(buf), binary.BigEndian, hdr);
+		hdr := &Header{}
+		binary.Read(bytes.NewReader(buf), binary.BigEndian, hdr)
 		if hdr.Magic == hdrMagic {
 			return hdr, nil
 		}
@@ -68,7 +69,7 @@ func PrepareHeader(c *Config) (*Header, error) {
 	}
 
 	hdr := &Header{
-		Magic:            [4]byte{'O', 'C', 'P', 'C'},
+		Magic:            [4]byte{'S', 'H', 'I', 'W'},
 		VendorId:         uint16(c.VendorId),
 		DeviceId:         uint16(c.DeviceId),
 		ImageSize:        imageSize,
